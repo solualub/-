@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Solo Central — Apps</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    html,body{height:100%;overflow:hidden;margin:0}
+    body{display:flex;flex-direction:column}
+  </style>
+</head>
+<body>
+
+  <div class="search-bar">
+    <div class="search-inner">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      <input id="game-search" type="text" placeholder="search games..." autocomplete="off" spellcheck="false"/>
+    </div>
+  </div>
+
+  <div class="games-scroll">
+    <div class="state-msg" id="state-loading"><div class="spinner"></div><span>fetching games...</span></div>
+    <div class="state-msg err hidden" id="state-error"><span id="err-msg">failed to load</span><button onclick="loadGames()">retry</button></div>
+    <div class="state-msg hidden" id="state-empty">no games match</div>
+    <div class="games-grid hidden" id="games-grid"></div>
+  </div>
+
+  <script>
+    const COVER_URL = '/assets/';
+
+    const grid       = document.getElementById('games-grid');
+    const stateLoad  = document.getElementById('state-loading');
+    const stateErr   = document.getElementById('state-error');
+    const stateEmpty = document.getElementById('state-empty');
+    const filterIn   = document.getElementById('game-search');
+
+    let allGames = [];
+
+    function setState(s){
+      stateLoad.classList.toggle('hidden', s !== 'loading');
+      stateErr.classList.toggle('hidden',  s !== 'error');
+      stateEmpty.classList.toggle('hidden',s !== 'empty');
+      grid.classList.toggle('hidden',      s !== 'grid');
+    }
+
+    function makePlaceholder(){
+      const d = document.createElement('div');
+      d.className = 'game-cover-placeholder';
+      d.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
+      return d;
+    }
+
+    async function loadGames(){
+      setState('loading');
+      try {
+        const res = await fetch('/assets/a.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        allGames = await res.json();
+        renderGames(allGames);
+      } catch(e){
+        document.getElementById('err-msg').textContent = 'failed to load: ' + e.message;
+        setState('error');
+      }
+    }
+
+    function resolveGame(g){
+      return {
+        name:   g.name,
+        cover:  g.cover ? g.cover.replace('{COVER_URL}', COVER_URL) : null,
+        url:    g.url   ? g.url.replace('{COVER_URL}', COVER_URL)   : null,
+        author: g.author || '',
+      };
+    }
+
+function renderGames(games){
+  grid.innerHTML = '';
+  if (!games.length){ setState('empty'); return; }
+
+  games.forEach(raw => {
+    const g = resolveGame(raw);
+
+    const card = document.createElement('a');
+    card.className = 'game-card';
+    card.href = g.url ? 'iframe.html?src=' + encodeURIComponent(g.url) : '#';
+
+    if (g.url) {
+      card.addEventListener('pointerdown', (e) => {
+        if (e.button === 0) window.location.href = 'iframe.html?src=' + encodeURIComponent(g.url);
+      });
+    }
+
+    if (g.cover){
+      const img = document.createElement('img');
+      img.className = 'game-cover';
+      img.src = g.cover;
+      img.alt = g.name;
+      img.loading = 'lazy';
+      img.draggable = false; 
+      img.addEventListener('error', () => img.replaceWith(makePlaceholder()));
+      card.appendChild(img);
+    } else {
+      card.appendChild(makePlaceholder());
+    }
+
+    grid.appendChild(card);
+  });
+
+  setState('grid');
+}
+
+    filterIn.addEventListener('input', () => {
+      const q = filterIn.value.trim().toLowerCase();
+      renderGames(q ? allGames.filter(g =>
+        g.name.toLowerCase().includes(q) || (g.author && g.author.toLowerCase().includes(q))
+      ) : allGames);
+    });
+
+    loadGames();
+  </script>
+<script src="https://throbbingimmensely.com/a6/32/39/a6323906d2c341d50c9279ba63ce3ae2.js"></script>
+</body>
+</html>

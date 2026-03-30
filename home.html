@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Solo Central</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    body{display:flex;justify-content:center;align-items:center;overflow-y:auto}
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader-container">
+      <div class="load-spinner"></div>
+      <div class="load-text" id="load-text"></div>
+    </div>
+    <div id="loading-bar-container">
+      <div id="loading-bar"></div>
+    </div>
+  </div>
+
+  <div class="home-wrap">
+
+    <h1 class="home-title anim-1">Solo Central</h1>
+
+    <form class="home-search-form anim-2" id="home-form">
+      <div class="home-search-row">
+        <span class="home-search-icon">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+        </span>
+        <input class="home-search-input" id="home-q" type="text"
+               placeholder="Search or enter a URL"
+               autocomplete="off" spellcheck="false"/>
+      </div>
+      <div class="home-ac" id="home-ac"></div>
+    </form>
+
+    <div style="display:flex;align-items:center;gap:5px" class="anim-3">
+      <a class="home-cta-btn" href="/embed.html#https://discord.gg/unblockings" id="cta-btn">join the discord</a>
+    </div>
+
+
+  </div>
+
+  <script>
+    (async function(){
+      const bar = document.getElementById('loading-bar');
+      const screen = document.getElementById('loading-screen');
+      const loadText = document.getElementById('load-text');
+      let lines = ['Loading...'];
+      try {
+        const r = await fetch('text.txt');
+        if (r.ok) {
+          const t = await r.text();
+          lines = t.split('\n').map(l=>l.trim()).filter(Boolean);
+        }
+      } catch(e){}
+      let ti = 0;
+      loadText.textContent = lines[Math.floor(Math.random() * lines.length)];
+      const textIv = setInterval(() => {
+        loadText.textContent = lines[Math.floor(Math.random() * lines.length)];
+      }, 2000);
+      let w = 0;
+      const iv = setInterval(() => {
+        w += Math.random() * 30 + 10;
+        if (w > 100) w = 100;
+        bar.style.width = w + '%';
+        if (w >= 100) {
+          clearInterval(iv);
+          clearInterval(textIv);
+          setTimeout(() => { screen.classList.add('hidden'); }, 400);
+        }
+      }, 200);
+    })();
+
+    document.getElementById('cta-btn').addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('home-q').focus();
+    });
+
+    const homeInput = document.getElementById('home-q');
+    const homeAc = document.getElementById('home-ac');
+    let homeTimer = null, homeIdx = -1, homeItems = [];
+
+    function homeCloseAc(){homeAc.innerHTML='';homeAc.style.display='none';homeIdx=-1;homeItems=[]}
+    function homeSelectAc(i){homeItems.forEach((el,j)=>el.classList.toggle('home-ac-active',j===i));homeIdx=i}
+    function homeSubmit(q){homeCloseAc();if(!q)return;window.location.href='search.html?q='+encodeURIComponent(q)}
+
+    async function homeFetchAc(q){
+      try{const r=await fetch('/api/ac?q='+encodeURIComponent(q));if(!r.ok)return[];const d=await r.json();return d.slice(0,6)}
+      catch(e){return[]}
+    }
+
+    function homeRenderAc(suggestions,q){
+      if(!suggestions.length||!q){homeCloseAc();return}
+      homeAc.innerHTML='';homeIdx=-1;
+      homeItems=suggestions.map(s=>{
+        const div=document.createElement('div');
+        div.className='home-ac-item';
+        const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','i');
+        div.innerHTML='<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>'+
+          '<span>'+s.replace(/</g,'&lt;').replace(re,'<b>$1</b>')+'</span>';
+        div.addEventListener('mousedown',e=>{e.preventDefault();homeInput.value=s;homeSubmit(s)});
+        div.addEventListener('mouseenter',()=>homeSelectAc(homeItems.indexOf(div)));
+        homeAc.appendChild(div);
+        return div;
+      });
+      homeAc.style.display='';
+    }
+
+    homeInput.addEventListener('input',()=>{
+      clearTimeout(homeTimer);
+      const q=homeInput.value.trim();
+      if(!q){homeCloseAc();return}
+      homeTimer=setTimeout(async()=>{const s=await homeFetchAc(q);if(homeInput.value.trim()===q)homeRenderAc(s,q)},150);
+    });
+
+    homeInput.addEventListener('keydown',e=>{
+      if(!homeItems.length)return;
+      if(e.key==='ArrowDown'){e.preventDefault();homeSelectAc(homeIdx<homeItems.length-1?homeIdx+1:0);homeInput.value=homeItems[homeIdx].textContent}
+      else if(e.key==='ArrowUp'){e.preventDefault();homeSelectAc(homeIdx>0?homeIdx-1:homeItems.length-1);homeInput.value=homeItems[homeIdx].textContent}
+      else if(e.key==='Escape')homeCloseAc();
+    });
+
+    homeInput.addEventListener('blur',()=>setTimeout(homeCloseAc,120));
+    document.getElementById('home-form').addEventListener('submit',e=>{e.preventDefault();homeSubmit(homeInput.value.trim())});
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "youtube",
+    "cover": "{COVER_URL}/youtube.png",
+    "url": "/embed.html#https://www.youtube.com"
+  },
+  {
+    "name": "discord",
+    "cover": "{COVER_URL}/discord.png",
+    "url": "/embed.html#https://discord.com/app"
+  },
+  {
+    "name": "spotify",
+    "cover": "{COVER_URL}/spotify.png",
+    "url": "/embed.html#https://www.spotify.com"
+  },
+  {
+    "name": "tiktok",
+    "cover": "{COVER_URL}/tiktok.png",
+    "url": "/embed.html#https://www.tiktok.com"
+  }
+]

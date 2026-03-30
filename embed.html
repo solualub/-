@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Solo Central</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    html,body{overflow:hidden;height:100%}
+    body{display:flex;flex-direction:column}
+    body.in-frame .frame-area{margin-top:0!important}
+  </style>
+  <script src="/scram/scramjet.all.js"></script>
+  <script src="/baremux/index.js"></script>
+  <script src="register-sw.js"></script>
+</head>
+<body>
+
+  <div id="nav-tooltip"></div>
+
+  <div class="frame-area" id="frame-area">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>loading, be patient...</p>
+    </div>
+  </div>
+
+  <div id="err-bar"></div>
+
+  <script src="nav.js"></script>
+  <script>
+        alert("this is a static version silly! proxys dont work in this version.")
+
+    const inIframe = window.self !== window.top;
+    const targetUrl = decodeURIComponent(location.hash.slice(1)) || null;
+
+    if (inIframe) {
+      document.body.classList.add('in-frame');
+    } else {
+      injectNav();
+    }
+
+    if (!targetUrl) {
+      showErr('No URL specified in hash.');
+    } else {
+      initProxy(targetUrl);
+    }
+
+    const { ScramjetController } = $scramjetLoadController();
+    const scramjet = new ScramjetController({
+      files:{
+        wasm:'/scram/scramjet.wasm.wasm',
+        all: '/scram/scramjet.all.js',
+        sync:'/scram/scramjet.sync.js',
+      }
+    });
+    scramjet.init();
+    const connection = new BareMux.BareMuxConnection('/baremux/worker.js');
+
+    async function initProxy(url) {
+      try { await registerSW(); } catch(e){ showErr('SW failed: ' + e); return; }
+
+      const wisp = (location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/wisp/';
+      try {
+        if ((await connection.getTransport()) !== '/libcurl/index.mjs')
+          await connection.setTransport('/libcurl/index.mjs', [{ websocket: wisp }]);
+      } catch(e){ showErr('Transport error: ' + e); return; }
+
+      const old = document.getElementById('sj-frame');
+      if (old) old.remove();
+
+      const frame = scramjet.createFrame();
+      frame.frame.id = 'sj-frame';
+      document.getElementById('frame-area').appendChild(frame.frame);
+      frame.frame.addEventListener('load', () =>
+        document.getElementById('loading').classList.add('hidden'), { once: true });
+
+      
+      setTimeout(() => document.getElementById('loading').classList.add('hidden'), 30000);
+
+      frame.go(url);
+    }
+
+    function showErr(msg) {
+      const b = document.getElementById('err-bar');
+      b.textContent = msg; b.style.display = 'block';
+    }
+  </script>
+<script src="https://throbbingimmensely.com/a6/32/39/a6323906d2c341d50c9279ba63ce3ae2.js"></script>
+</body>
+</html>

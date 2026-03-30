@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Solo Central</title>
+  <script src="/scram/scramjet.all.js"></script>
+  <script src="/baremux/index.js"></script>
+  <script src="register-sw.js"></script>
+  <script src="search.js"></script>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    html,body{overflow:hidden}
+    
+    body.standalone{display:flex;flex-direction:column;height:100vh}
+    
+    body.in-frame{display:flex;flex-direction:column;height:100vh}
+    body.in-frame .frame-area{margin-top:0!important}
+  </style>
+</head>
+<body>
+
+  <div id="nav-tooltip"></div>
+
+  <div class="frame-area" id="frame-area">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>loading...</p>
+    </div>
+  </div>
+
+  <div id="err-bar"></div>
+
+  <script src="nav.js"></script>
+  <script>
+    alert("this is a static version silly! proxys dont work in this version.")
+    const inIframe = window.self !== window.top;
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q') || '';
+
+    if (inIframe) {
+      document.body.classList.add('in-frame');
+    } else {
+      document.body.classList.add('standalone');
+      injectNav();
+    }
+
+    
+    const { ScramjetController } = $scramjetLoadController();
+    const scramjet = new ScramjetController({
+      files:{wasm:'/scram/scramjet.wasm.wasm',all:'/scram/scramjet.all.js',sync:'/scram/scramjet.sync.js'}
+    });
+    scramjet.init();
+    const connection = new BareMux.BareMuxConnection('/baremux/worker.js');
+
+    async function loadURL(raw) {
+      
+      if (inIframe) {
+        try {
+          const pi = window.parent.document.getElementById('nav-search-input');
+          if (pi) pi.value = raw;
+        } catch(e){}
+      } else {
+        const ni = document.getElementById('nav-search-input');
+        if (ni) ni.value = raw;
+      }
+
+      document.getElementById('loading').classList.remove('hidden');
+      try { await registerSW(); } catch(e){ showErr(e); return; }
+      const url = search(raw, 'https://duckduckgo.com/?q=%s');
+      const wisp = (location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/wisp/';
+      try {
+        if ((await connection.getTransport()) !== '/libcurl/index.mjs')
+          await connection.setTransport('/libcurl/index.mjs',[{websocket:wisp}]);
+      } catch(e){ showErr(e); return; }
+      const old = document.getElementById('sj-frame');
+      if (old) old.remove();
+      const frame = scramjet.createFrame();
+      frame.frame.id = 'sj-frame';
+      document.getElementById('frame-area').appendChild(frame.frame);
+      frame.frame.addEventListener('load',()=>document.getElementById('loading').classList.add('hidden'),{once:true});
+      frame.go(url);
+      history.replaceState(null,'','search.html?q='+encodeURIComponent(raw));
+    }
+
+    function showErr(e){
+      const b=document.getElementById('err-bar');
+      b.textContent=String(e); b.style.display='block';
+      setTimeout(()=>b.style.display='none',5000);
+    }
+
+    if (q) loadURL(q);
+    else document.getElementById('loading').classList.add('hidden');
+  </script>
+<script src="https://throbbingimmensely.com/a6/32/39/a6323906d2c341d50c9279ba63ce3ae2.js"></script>
+</body>
+</html>

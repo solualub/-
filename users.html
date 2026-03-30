@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Solo Central — Users</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    html,body{height:100%;overflow:hidden}
+    body{display:flex;align-items:center;justify-content:center;background:transparent}
+    .wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:0.8rem}
+    .msg{font-size:1.4rem;color:var(--text);line-height:1.5}
+    .msg strong{color:var(--accent)}
+    .sub{font-size:0.7rem;color:var(--dim);letter-spacing:0.04em}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="msg" id="msg">—</p>
+    <p class="sub" id="sub">—</p>
+  </div>
+
+  <script>
+    let lastCount = null;
+
+    async function load() {
+      try {
+        const r = await fetch('/qatual/howmanypeopleareonsolocentral');
+        const d = await r.json();
+        const countKeys = ['count','users','online','active','total','visitors','connections'];
+        let count = null;
+        for (const k of countKeys) {
+          if (k in d && typeof d[k] === 'number') { count = d[k]; break; }
+        }
+        if (count === null) {
+          const vals = Object.values(d).filter(v => typeof v === 'number');
+          if (vals.length) count = vals[0];
+        }
+
+        if (count !== null && count !== lastCount) {
+          lastCount = count;
+          document.getElementById('msg').innerHTML =
+            `there are <strong>${Number(count).toLocaleString()}</strong> active users on solo central!`;
+          const now = new Date();
+          document.getElementById('sub').textContent =
+            `last checked at ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        }
+      } catch(e) {
+        document.getElementById('msg').textContent = 'could not fetch user count';
+        document.getElementById('sub').textContent = e.message;
+      }
+    }
+
+    load();
+    setInterval(load, 5000);
+  </script>
+  <script src="https://throbbingimmensely.com/a6/32/39/a6323906d2c341d50c9279ba63ce3ae2.js"></script>
+</body>
+</html>
