@@ -1,99 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display:block;width:100vw;height:100vh;">
+<svg xmlns="http://www.w3.org/2000/svg" style="display:block;width:100vw;height:100vh;">
 	<foreignObject width="100%" height="100%">
-		<html xmlns="http://www.w3.org/1999/xhtml" lang="en" style="height:100%;overflow:hidden;">
-		<head>
-        <base href="https://cdn.jsdelivr.net/gh/solualub/-@main/" />
-			<meta charset="utf-8"/>
-			<meta name="viewport" content="width=device-width,initial-scale=1"/>
-			<title>Solo Central</title>
-			<link rel="stylesheet" href="styles.css"/>
-			<style>
-				html,body{overflow:hidden;height:100%;margin:0;padding:0;}
-				body{display:flex;flex-direction:column;}
-			</style>
-		</head>
-		<body>
-
-			<div id="nav-tooltip"></div>
-
-			<nav class="top-nav">
-				<a class="nav-logo" href="/index.html">Solo Central</a>
-				<div class="nav-icons">
-					<a class="nav-icon" href="home.html" data-tip="Home">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
-					</a>
-					<a class="nav-icon" href="g.html" data-tip="Games">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M7 12h4M9 10v4"/><circle cx="16" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="18.5" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
-					</a>
-					<a class="nav-icon" href="a.html" data-tip="Apps">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-					</a>
-				</div>
-			</nav>
-
+		<html xmlns="http://www.w3.org/1999/xhtml" style="height:100%;margin:0;padding:0;overflow:hidden;">
+		<body style="margin:0;padding:0;height:100%;overflow:hidden;">
 			<iframe
-				class="content-frame"
-				id="content-frame"
-				src="home.html"
-				frameborder="0"
-				scrolling="auto"
-				style="flex:1;border:none;width:100%;"
+				style="width:100%;height:100%;border:none;display:block;"
+				srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;base href=&quot;https://cdn.jsdelivr.net/gh/solualub/-@main/&quot;/&gt;&lt;meta charset=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;/&gt;&lt;title&gt;Solo Central&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;styles.css&quot;/&gt;&lt;style&gt;html,body{overflow:hidden;height:100%;margin:0}body{display:flex;flex-direction:column;height:100vh}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div id=&quot;nav-tooltip&quot;&gt;&lt;/div&gt;&lt;iframe class=&quot;content-frame&quot; id=&quot;content-frame&quot; src=&quot;home.html&quot; frameborder=&quot;0&quot; scrolling=&quot;auto&quot; style=&quot;flex:1;border:none;width:100%;&quot;&gt;&lt;/iframe&gt;&lt;script src=&quot;nav.js&quot;&gt;&lt;/script&gt;&lt;script&gt;const frame=document.getElementById('content-frame');injectNav();document.querySelectorAll('.nav-icon[href]').forEach(a=&gt;{a.addEventListener('click',e=&gt;{e.preventDefault();frame.src=a.getAttribute('href');});});&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"
 			></iframe>
-
-			<script src="nav.js"></script>
-			<script>
-				document.querySelectorAll('.nav-icon[href]').forEach(a => {
-					a.addEventListener('click', e => {
-						e.preventDefault();
-						document.getElementById('content-frame').src = a.getAttribute('href');
-					});
-				});
-                function injectNav() {
-  const nav = document.createElement('nav');
-  nav.className = 'top-nav';
-  nav.innerHTML = `
-    <a class="nav-logo" href="/index.svg">Solo Central | Static</a>
-    <div class="nav-icons">
-      <a class="nav-icon" href="home.html" data-tip="Home">
-        <svg viewBox="0 0 24 24">
-          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/>
-        </svg>
-      </a>
-      <a class="nav-icon" href="g.html" data-tip="Games">
-        <svg viewBox="0 0 24 24">
-          <rect x="2" y="6" width="20" height="12" rx="5"/>
-          <path d="M7 12h4M9 10v4"/>
-          <circle cx="16" cy="11" r="1" fill="currentColor" stroke="none"/>
-          <circle cx="18.5" cy="13" r="1" fill="currentColor" stroke="none"/>
-        </svg>
-      </a>
-      <a class="nav-icon" href="a.html" data-tip="Apps">
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-      </a>
-    </div>
-  `;
-  document.body.prepend(nav);
-
-  const tooltip = document.getElementById('nav-tooltip');
-  if (tooltip) {
-    let hideTimer;
-    nav.querySelectorAll('.nav-icon[data-tip]').forEach(el => {
-      el.addEventListener('mouseenter', () => { clearTimeout(hideTimer); tooltip.textContent = el.dataset.tip; tooltip.style.opacity = '1'; });
-      el.addEventListener('mouseleave', () => { hideTimer = setTimeout(() => tooltip.style.opacity = '0', 80); });
-    });
-    document.addEventListener('mousemove', e => { tooltip.style.left = e.clientX+'px'; tooltip.style.top = e.clientY+'px'; });
-  }
-
-  return nav;
-}
-
-			</script>
 		</body>
 		</html>
 	</foreignObject>
